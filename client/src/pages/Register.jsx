@@ -2,11 +2,12 @@ import React, { useState } from "react";
 import entrance from "../assets/entrance.jpg";
 import { useNavigate } from "react-router-dom";
 import api from "../config/api";
+import { toast } from 'react-hot-toast';
 
 const Register = () => {
   const navigate = useNavigate();
   const [registerData, setRegisterData] = useState({
-    fullName: "",
+    fullname: "",
     email: "",
     password: "",
     phone: "",
@@ -24,16 +25,16 @@ const Register = () => {
     console.log(registerData);
     try{
       const res = await api.post("/auth/register", registerData);
-      alert(res.data.message);
-    }catch (error){
-      alert(error.message)
-    }
-    setRegisterData({
-      fullName: "",
+      toast.success(res.data.message);
+      setRegisterData({
+      fullname: "",
       email: "",
       password: "",
       phone: "",
     })
+    }catch (error){
+      toast.error(`Error : ${error.response?.status ||  error.message}  ${"|"+ error.response?.data.message || ""}`);
+    }
   }
 
   return (
@@ -55,10 +56,10 @@ const Register = () => {
                 <label className="text-pink-500 block mb-1">Name</label>
                 <input
                   type="text"
-                  name="fullName"
+                  name="fullname"
                   className="w-full px-4 py-2 rounded-lg bg-white/20 text-black placeholder:text-gray-500 border border-yellow-400 focus:outline-none focus:ring-2 focus:ring-pink-300"
                   placeholder="Enter your name"
-                  value={registerData.fullName}
+                  value={registerData.fullname}
                   onChange={handelChange}
                   required
                 />

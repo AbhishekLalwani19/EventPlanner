@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import entrance from "../assets/entrance.jpg";
 import { useNavigate } from "react-router-dom";
+import api from "../config/api";
+import { toast } from 'react-hot-toast';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -8,11 +10,20 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const formSubmitKro = (e) => {
+  const formSubmitKro = async(e) => {
     e.preventDefault();
     const logindata = {
-      Email: email,
-      Password: password,
+      email: email,
+      password: password,
+    }
+     try{
+      const res =await api.post("/auth/login", logindata);
+      toast.success(res.data.message);
+      setEmail("");
+      setPassword("");
+      navigate("/userDashboard");
+    }catch (error) {
+      toast.error(`Error : ${error.response?.status ||  error.message}  ${"|"+ error.response?.data.message || ""}`);
     }
     console.log(logindata);
   }

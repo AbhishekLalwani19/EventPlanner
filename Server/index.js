@@ -9,12 +9,12 @@ import AuthRouter from './src/routes/authRouter.js';
 const app = express();
 
 app.use(cors({
-    origin: "http://localhost:5173",
+    origin: "http://localhost:5174",
     credentials: true,
 }));
 app.use(express.json());
 app.use(morgan("dev"));
-app.use("/auth", AuthRouter);
+app.use("/api/auth", AuthRouter);
 
 app.get("/", (req, res) => {
     res.json({message:"Hello World!"});
