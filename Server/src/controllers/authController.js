@@ -128,6 +128,38 @@ export const Logout = (req, res, next) => {
     }   
 }
 
+// export const UpdateUser = async (req, res, next) => {
+//   try{
+//     if(!UserActivation){
+//       req.statusCode("404")
+
+//     }
+//   }
+// }
 export const UpdateUser = async (req, res, next) => {
-    
-}
+  try {
+    const userId = req.params.id;
+    const { fullname, email, phone } = req.body;
+
+    if (!fullname || !email || !phone) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { fullname, email, phone },
+      { new: true }
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    res.status(200).json({
+      message: "User updated successfully",
+      user: updatedUser,
+    });
+  } catch (err) {
+    next(err);
+  }
+};

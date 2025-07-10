@@ -6,15 +6,29 @@ import cors from 'cors';
 // import mongoose from 'mongoose';    
 import connectDB from './src/config/db.js';
 import AuthRouter from './src/routes/authRouter.js';
+import UserRouter from './src/routes/userRoutes.js';
+import cookieParser from 'cookie-parser';
+
 const app = express();
 
+const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
+
 app.use(cors({
-    origin: "http://localhost:5174",
-    credentials: true,
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["POST", "GET"],
+  credentials: true
 }));
 app.use(express.json());
+app.use(cookieParser())
 app.use(morgan("dev"));
 app.use("/api/auth", AuthRouter);
+app.use("/api/user",UserRouter)
 
 app.get("/", (req, res) => {
     res.json({message:"Hello World!"});
