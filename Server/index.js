@@ -8,21 +8,27 @@ import connectDB from './src/config/db.js';
 import AuthRouter from './src/routes/authRouter.js';
 import UserRouter from './src/routes/userRoutes.js';
 import cookieParser from 'cookie-parser';
+import {v2 as cloudinary} from 'cloudinary'
 
 const app = express();
 
 const allowedOrigins = ["http://localhost:5173", "http://localhost:5174"];
 
+// app.use(cors({
+//   origin: function (origin, callback) {
+//     if (!origin || allowedOrigins.includes(origin)) {
+//       callback(null, true);
+//     } else {
+//       callback(new Error("Not allowed by CORS"));
+//     }
+//   },
+//   methods: ["POST", "GET"],
+//   credentials: true
+// }));
 app.use(cors({
-  origin: function (origin, callback) {
-    if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error("Not allowed by CORS"));
-    }
-  },
-  methods: ["POST", "GET"],
-  credentials: true
+  origin: "http://localhost:5173", // Allow Vite frontend
+  methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"], // ✅ Include PUT here
+  credentials: true,
 }));
 app.use(express.json());
 app.use(cookieParser())
@@ -48,6 +54,15 @@ app.use((err, req, res, next) => {
     const port = process.env.PORT || 5000; 
 
     connectDB()
-app.listen(port, () => {
+app.listen(port, () => async () => {
     console.log("Server is running on port ", port);
+
+    try{
+      await connectDB();
+      await cloudinary.api.resources({ max_results: 30 });
+      console.log("Cloudinary Connected")
+    }catch{
+      console.log(error)
+
+    }
 });

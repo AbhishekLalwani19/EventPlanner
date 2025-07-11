@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import UserDashboard from "./pages/UserDashboard";
 import { Toaster } from 'react-hot-toast';
+import UserDashboardEdit from "./pages/userDashboardEdit";
 
 
 const App = () => {
@@ -20,7 +21,8 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-           <Route path="/userDashboard" element={<UserDashboard />} />
+          <Route path="/userDashboard" element={<UserDashboard />} />
+          <Route path="/userDashboardEdit" element={<UserDashboardEdit />} />
         </Routes>
       </BrowserRouter>
     </>

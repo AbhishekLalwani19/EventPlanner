@@ -1,51 +1,10 @@
-import User from '../models/User.js';
+import User from '../models/userModel.js';
 import bcrypt from 'bcryptjs';
 import genToken from '../utils/auth.js';
 
-// export const Register = async (req, res, next) => {
-
-//     try{
-//         const {fullname, email, password, phone} = req.body;
-//         if(!fullname || !email || !password || !phone){
-//             // return res.status(400).json({message: "Please provide all fields"});
-//             const error = new Error("Please provide all fields");
-//             error.statusCode = 400;
-//             return next(error);
-//         }
-
-//         const existingUser = User.findOne({email});
-//         if(existingUser){
-//             // return res.status(409).json({message: "User already exists"});
-//             const error = new Error("User already exists");
-//             error.statusCode = 409;
-//             return next(error);
-//         }
-
-//         const hashedPassword = bcrypt.hashSync(password, 10);
-//         const user = new User({
-//             fullname,
-//             email,
-//             password: hashedPassword,
-//             phone
-//         });
-
-//        await user.save()
-//             .then((user) => {
-//                 res.status(201).json({
-//                     message: `User registered successfully ${user.fullname}`, data: user
-//                 });
-//             })
-//             .catch((error) => {
-//                 next(error);
-//             });
-//     }
-//     catch(error){
-//         next(error);
-//     }
-// }
 export const Register = async (req, res, next) => {
   try {
-    const { fullname, email, password, phone } = req.body;
+    const { fullname, email, password, phone, } = req.body;
 
     if (!fullname || !email || !password || !phone) {
       const error = new Error("Please provide all fields");
@@ -61,11 +20,14 @@ export const Register = async (req, res, next) => {
     }
 
     const hashedPassword = bcrypt.hashSync(password, 10);
+
+    const profilePic = `https://placehold.co/600x400?text=${fullname.charAt(0).toUpperCase()}`;
     const user = new User({
       fullname,
       email,
       password: hashedPassword,
       phone,
+      photo: profilePic,
     });
 
     const savedUser = await user.save(); // ✅ CLEANED
@@ -136,20 +98,94 @@ export const Logout = (req, res, next) => {
 //     }
 //   }
 // }
+// export const UpdateUser = async (req, res, next) => {
+//   try {
+//     const userId = req.params.id;
+//     const { fullname, email, phone } = req.body;
+
+//     if (!fullname || !email || !phone) {
+//       return res.status(400).json({ message: "All fields are required." });
+//     }
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       userId,
+//       { fullname, email, phone },
+//       { new: true }
+//     );
+
+//     if (!updatedUser) {
+//       return res.status(404).json({ message: "User not found." });
+//     }
+
+//     res.status(200).json({
+//       message: "User updated successfully",
+//       user: updatedUser,
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };
+// export const UpdateUser = async (req, res, next) => {
+//   try {
+//     const userId = req.params.id;
+//     console.log("🟡 Incoming update for ID:", userId);
+//     console.log("📦 Payload:", req.body);
+
+//     const { fullname, email, phone } = req.body;
+
+//     if (!fullname || !email || !phone) {
+//       return res.status(400).json({ message: "All fields are required." });
+//     }
+
+//     const updatedUser = await User.findByIdAndUpdate(
+//       userId,
+//       { fullname, email, phone },
+//       { new: true }
+//     );
+
+//     if (!updatedUser) {
+//       return res.status(404).json({ message: "User not found." });
+//     }
+
+//     res.status(200).json({
+//       message: "User updated successfully",
+//       user: updatedUser,
+//     });
+//   } catch (err) {
+//     console.error("❌ UpdateUser Error:", err);
+//     res.status(500).json({ message: "Internal Server Error", error: err.message });
+//   }
+// };
+
 export const UpdateUser = async (req, res, next) => {
   try {
     const userId = req.params.id;
+
+    // ✅ Use multer to get data from multipart/form-data
     const { fullname, email, phone } = req.body;
+    const photo = req.file;
 
     if (!fullname || !email || !phone) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
-    const updatedUser = await User.findByIdAndUpdate(
-      userId,
-      { fullname, email, phone },
-      { new: true }
-    );
+    const updateFields = { fullname, email, phone };
+
+    // ✅ If a photo is uploaded, upload to Cloudinary or save locally
+    if (photo) {
+      const base64Image = photo.buffer.toString("base64");
+      const imageDataURI = `data:${photo.mimetype};base64,${base64Image}`;
+
+      const uploadResponse = await cloudinary.uploader.upload(imageDataURI, {
+        folder: "profilePics",
+      });
+
+      updateFields.photo = uploadResponse.secure_url;
+    }
+
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {
+      new: true,
+    });
 
     if (!updatedUser) {
       return res.status(404).json({ message: "User not found." });
@@ -157,9 +193,10 @@ export const UpdateUser = async (req, res, next) => {
 
     res.status(200).json({
       message: "User updated successfully",
-      user: updatedUser,
+      data: updatedUser,
     });
   } catch (err) {
     next(err);
   }
 };
+
